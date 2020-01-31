@@ -58,7 +58,7 @@ class Net(nn.Module):
 
 
 net = Net()
-print(net)
+# print(net)
 """
 Net(
   (conv1): Conv2d(1, 6, kernel_size=(5, 5), stride=(1, 1))
@@ -71,10 +71,10 @@ Net(
 
 # net.parameters()：返回可被学习的参数（权重）列表和值
 # nn.Parameter：一种变量，当把它赋值给一个Module时，被 自动 地注册为一个参数
-params = list(net.parameters())
-print(len(params))
-for i in iter(range(len(params))):
-    print(params[i].size())
+# params = list(net.parameters())
+# print(len(params))  # 9
+# for i in iter(range(len(params))):
+#     print(params[i].size())
 """
 torch.Size([6, 1, 5, 5])    conv1
 torch.Size([6])             bias
@@ -94,7 +94,7 @@ torch.Size([10])            bias
 # 注：这个网络（LeNet）期望的输入大小是32×32，如果使用MNIST数据集来训练这个网络，请把图片大小重新调整到32×32。
 # random_input = torch.randn(1, 1, 32, 32)
 # print(random_input)
-# output = net(random_input)
+# output = net(random_input)  # shape: torch.Size([1, 10])
 # print(output)
 #
 # # 3. 将所有参数的梯度缓存清零
@@ -108,7 +108,7 @@ torch.Size([10])            bias
 # output = net(random_input)
 # print(output)
 target = torch.randn(10)  # 随机值作为样例
-target = target.view(1, -1)  # 使target和output的shape相同
+target = target.view(1, -1)  # 使target和output的shape相同   # shape: torch.Size([1, 10])
 criterion = nn.MSELoss()  # 创建criterion实例对象
 # loss = criterion(output, target)
 # print(loss)

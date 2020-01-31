@@ -19,9 +19,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import numpy as np
-import cv2
+# import cv2
 
 # 1. 读取和归一化 CIFAR10
 # torchvision的输出是[0,1]的PILImage图像，我们把它转换为归一化范围为[-1, 1]的张量。
@@ -31,13 +32,11 @@ transform = transforms.Compose(
 
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
                                         download=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                          shuffle=True, num_workers=0)
+trainloader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=0)       # shape: 12500
 
 testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                        download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=4,
-                                         shuffle=False, num_workers=0)
+testloader = DataLoader(testset, batch_size=4, shuffle=False, num_workers=0)
 
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
@@ -65,7 +64,7 @@ images, labels = dataiter.next()
 imshow(torchvision.utils.make_grid(images))
 # 显示图像标签
 # Python join() 方法：用于将序列中的元素以指定的字符连接生成一个新的字符串。
-print(' '.join('%5s' % classes[labels[j]] for j in range(4)))
+print(' '.join('%5s' % classes[labels[j]] for j in range(4)))       # ship truck  frog  bird
 
 
 # 2. 定义一个卷积神经网络
@@ -91,6 +90,16 @@ class Net(nn.Module):
 
 net = Net()
 print(net)
+"""
+Net(
+  (conv1): Conv2d(3, 6, kernel_size=(5, 5), stride=(1, 1))
+  (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv2): Conv2d(6, 16, kernel_size=(5, 5), stride=(1, 1))
+  (fc1): Linear(in_features=400, out_features=120, bias=True)
+  (fc2): Linear(in_features=120, out_features=84, bias=True)
+  (fc3): Linear(in_features=84, out_features=10, bias=True)
+)
+"""
 
 # 3. 定义损失函数和优化器
 # 我们使用交叉熵作为损失函数，使用带动量的随机梯度下降。
@@ -100,37 +109,52 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 # 4. 训练网路
 # 有趣的时刻开始了。 我们只需在数据迭代器上循环，将数据输入给网络，并优化。
 # range()函数：返回的是一个可迭代对象（类型是对象），而不是列表类型，所以打印的时候不会打印列表。
-for epoch in range(2):  # 多批次循环
-
-    running_loss = 0.0
-    # enumerate()函数：用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据和数据下标。
-    for i, data in enumerate(trainloader, 0):
-        # 获取输入
-        inputs, labels = data
-
-        # 梯度置0
-        optimizer.zero_grad()
-
-        # 正向传播
-        outputs = net(inputs)
-
-        # 计算损失
-        loss = criterion(outputs, labels)
-
-        # 反向传播
-        loss.backward()
-
-        # 优化
-        optimizer.step()
-
-        # 打印状态信息
-        running_loss += loss.item()
-        if i % 2000 == 1999:    # 每2000批次打印一次
-            print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, i + 1, running_loss / 2000))
-            running_loss = 0.0
+# for epoch in range(2):  # 多批次循环
+#
+#     running_loss = 0.0
+#     # enumerate()函数：用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据和数据下标。
+#     for i, data in enumerate(trainloader, 0):
+#         # 获取输入
+#         inputs, labels = data
+#
+#         # 梯度置0
+#         optimizer.zero_grad()
+#
+#         # 正向传播
+#         outputs = net(inputs)
+#
+#         # 计算损失
+#         loss = criterion(outputs, labels)
+#
+#         # 反向传播
+#         loss.backward()
+#
+#         # 优化
+#         optimizer.step()
+#
+#         # 打印状态信息,batchsize为2000
+#         running_loss += loss.item()
+#         if i % 2000 == 1999:    # 每2000批次打印一次
+#             print('[%d, %5d] loss: %.3f' %
+#                   (epoch + 1, i + 1, running_loss / 2000))
+#             running_loss = 0.0
 
 print('Finished Training')
+"""
+[1,  2000] loss: 2.168
+[1,  4000] loss: 1.807
+[1,  6000] loss: 1.636
+[1,  8000] loss: 1.564
+[1, 10000] loss: 1.524
+[1, 12000] loss: 1.451
+[2,  2000] loss: 1.353
+[2,  4000] loss: 1.361
+[2,  6000] loss: 1.354
+[2,  8000] loss: 1.323
+[2, 10000] loss: 1.306
+[2, 12000] loss: 1.289
+Finished Training
+"""
 
 # 5. 在测试集上测试网络
 # 我们在整个训练集上进行了2次训练，但是我们需要检查网络是否从数据集中学习到有用的东西。
@@ -172,3 +196,10 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # 确认我们的电脑支持CUDA，然后显示CUDA信息
 print(device)
+
+"""
+GroundTruth:    cat  ship  ship plane
+Predicted:    dog   car plane  ship
+Accuracy of the network on the 10000 test images: 54 %
+cuda:0
+"""
