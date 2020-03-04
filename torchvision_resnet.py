@@ -225,7 +225,7 @@ class ResNet(nn.Module):
             self.dilation *= stride
             stride = 1
 
-        # 如果stride不等于1或者维度不匹配的时候的downsample，可以看到也是用过一个1*1的操作来进行升维的，然后对其进行一次BN操作
+        # 如果图像尺寸或者通道数不匹配的时候的downsample，可以看到也是用过一个1*1的操作来进行升维的，然后对其进行一次BN操作
         if stride != 1 or self.inplanes != planes * block.expansion:
             # 一个有序的容器，神经网络模块将按照在传入构造器的顺序依次被添加到计算图中执行，
             # 同时以神经网络模块为元素的有序字典也可以作为传入参数。
